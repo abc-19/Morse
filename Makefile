@@ -6,7 +6,7 @@
 #     / /  \ \  | |\ \  \7
 #      "     "    "  "		VK
 
-OBJS = morse.o
+OBJS = morse.o alpha.o
 EXEC = MrS
 
 all: $(EXEC)
@@ -14,6 +14,6 @@ all: $(EXEC)
 $(EXEC): $(OBJS)
 	ld	-o $(EXEC) $(OBJS)
 %.o: %.s
-	as	$< -o $@
+	as	-o $@ $<
 clean:
 	rm	-rf $(OBJS) $(EXEC)

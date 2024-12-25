@@ -44,11 +44,11 @@ _start:
 	jl	.showUsage
 	popq	%rax
 	popq	%rax
-	popq	%rbx
+	popq	%r15										# XXX: Message's stored into r15
 	pushq	%rbp
 	movq	%rsp, %rbp
 	subq	$64, %rsp
-	movq	%rbx, -8(%rbp)
+	movq	%rbx, -8(%rbp)									# NOTE: is it really necessary?
 	movzbl	(%rax), %eax
 	cmpl	$'m', %eax
 	je	.modeMorse
@@ -64,9 +64,46 @@ _start:
 	SAY_L	.msg_unkmo(%rip), .len_unkmo(%rip), $2
 	FINI	$1
 
+.modeText:
+	movzbl	(%r15), %edi
+	testl	%edi, %edi
+	jz	.leaveAll
+	call	isItTextable
+	cmpl	$-1, %eax
+	je	.mT_nontex
+.mT_nontex:
+	SAY_M	%r15, $1, $1
+.mT_skip:
+	incq	%r15
+	jmp	.modeText
 .modeMorse:
 	jmp	.leaveAll
-.modeText:
-	jmp	.leaveAll
+
 .leaveAll:
 	FINI	$0
+
+
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-*
+isItTextable:
+	cmpl	$' ', %edi
+	je	.1_isspace
+	cmpl	$'A', %edi
+	jl	.1_no
+	cmpl	$'z', %edi
+	jg	.1_no
+	cmpl	$'Z', %edi
+	jle	.1_is_upp
+	cmpl	$'a', %edi
+	jge	.1_is_low
+.1_no:
+	movl	$-1, %eax
+	ret
+.1_is_upp:
+	addl	$32, %edi
+.1_is_low:
+	subl	$'a', %edi
+	movl	%edi, %eax
+	ret
+.1_isspace:
+	movl	$26, %eax
+	ret
