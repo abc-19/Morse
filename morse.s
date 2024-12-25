@@ -10,6 +10,9 @@
 	.msg_usage: .string	"MrS [u]: MrS <mode> <message>\n"
 	.len_usage: .quad	30
 
+	.msg_unkmo: .string	"MrS [e]: Unknown mode given\n"
+	.len_unkmo: .quad	28
+
 .section	.text
 .globl	_start
 
@@ -39,8 +42,31 @@ _start:
 	popq	%rax
 	cmpq	$3, %rax
 	jl	.showUsage
-	FINI	$0
+	popq	%rax
+	popq	%rax
+	popq	%rbx
+	pushq	%rbp
+	movq	%rsp, %rbp
+	subq	$64, %rsp
+	movq	%rbx, -8(%rbp)
+	movzbl	(%rax), %eax
+	cmpl	$'m', %eax
+	je	.modeMorse
+	cmpl	$'t', %eax
+	je	.modeText
+	jmp	.modeUnknown
 
 .showUsage:
 	SAY_L	.msg_usage(%rip), .len_usage(%rip), $1
+	FINI	$0
+
+.modeUnknown:
+	SAY_L	.msg_unkmo(%rip), .len_unkmo(%rip), $2
+	FINI	$1
+
+.modeMorse:
+	jmp	.leaveAll
+.modeText:
+	jmp	.leaveAll
+.leaveAll:
 	FINI	$0
