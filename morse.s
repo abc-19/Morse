@@ -74,7 +74,7 @@ _start:
 	movzbl	(%r15), %edi
 	testl	%edi, %edi
 	jz	.leaveAll
-	call	isItTextable
+	call	isItMorseable
 	cmpl	$-1, %eax
 	je	.mT_nontex
 	cltq
@@ -84,14 +84,14 @@ _start:
 	movq	%rdi, %rbx
 	call	lenOf
 	SAY_M	%rbx, %rax, $1
-	SAY_EN	$26
-
 	jmp	.mT_next
 .mT_nontex:
 	SAY_M	%r15, $1, $1
 .mT_next:
+	SAY_EN	$26
 	incq	%r15
 	jmp	.modeText
+
 .modeMorse:
 	jmp	.leaveAll
 
@@ -100,20 +100,18 @@ _start:
 	FINI	$0
 
 # -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-*
-isItTextable:
+isItMorseable:
 	cmpl	$' ', %edi
 	je	.1_isspace
 	cmpl	$'A', %edi
-	jl	.1_no
+	jl	.1_may_num
 	cmpl	$'z', %edi
-	jg	.1_no
+	jg	.1_may_num
 	cmpl	$'Z', %edi
 	jle	.1_is_upp
 	cmpl	$'a', %edi
 	jge	.1_is_low
-.1_no:
-	movl	$-1, %eax
-	ret
+
 .1_is_upp:
 	addl	$32, %edi
 .1_is_low:
@@ -121,7 +119,19 @@ isItTextable:
 	movl	%edi, %eax
 	ret
 .1_isspace:
-	movl	$26, %eax
+	movl	$36, %eax
+	ret
+.1_may_num:
+	cmpl	$'0', %edi
+	jl	.1_no
+	cmpl	$'9', %edi
+	jg	.1_no
+	subl	$'0', %edi
+	addl	$26, %edi
+	movl	%edi, %eax
+	ret
+.1_no:
+	movl	$-1, %eax
 	ret
 
 lenOf:

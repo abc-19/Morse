@@ -32,11 +32,21 @@
     	.Xx: .string "-..-"
     	.Xy: .string "-.--"
     	.Xz: .string "--.."
+	.X0: .string "-----"
+	.X1: .string ".----"
+	.X2: .string "..---"
+	.X3: .string "...--"
+	.X4: .string "....-"
+	.X5: .string "....."
+	.X6: .string "-...."
+	.X7: .string "--..."
+	.X8: .string "---.."
+	.X9: .string "----."
 	.X_: .string "/"
 
 	.section    .data.rel.local, "aw"
     	.align      32
-    	.size       MORSE, 216
+    	.size       MORSE, 296
     	MORSE:
 	.quad   .Xa
     	.quad   .Xb
@@ -64,6 +74,16 @@
     	.quad   .Xx
     	.quad   .Xy
     	.quad   .Xz
+    	.quad   .X0
+    	.quad   .X1
+    	.quad   .X2
+    	.quad   .X3
+    	.quad   .X4
+    	.quad   .X5
+    	.quad   .X6
+    	.quad   .X7
+    	.quad   .X8
+    	.quad   .X9
 	.quad	.X_
 
 	.globl	MORSE
