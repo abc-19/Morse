@@ -7,19 +7,40 @@
 #      "     "    "  "		VK
 
 .section	.rodata
-	hello_morse: .string "Hello World! Morse\n"
-	hello_len:   .quad   19
+	.msg_usage: .string	"MrS [u]: MrS <mode> <message>\n"
+	.len_usage: .quad	30
 
 .section	.text
 .globl	_start
 
-_start:	
-	movq	$1, %rax
-	movq	$1, %rdi
-	leaq	hello_morse(%rip), %rsi
-	movq	hello_len(%rip), %rdx
-	syscall
-
+.macro	FINI, status
+	movq	\status, %rdi
 	movq	$60, %rax
-	movq	$0, %rdi
 	syscall
+.endm
+
+.macro	SAY_L, msg, len, to
+	movq	\to, %rdi
+	leaq	\msg, %rsi
+	movq	\len, %rdx
+	movq	$1, %rax
+	syscall
+.endm
+
+.macro	SAY_M, msg, len, to
+	movq	\to, %rdi
+	movq	\msg, %rsi
+	movq	\len, %rdx
+	movq	$1, %rax
+	syscall
+.endm
+
+_start:	
+	popq	%rax
+	cmpq	$3, %rax
+	jl	.showUsage
+	FINI	$0
+
+.showUsage:
+	SAY_L	.msg_usage(%rip), .len_usage(%rip), $1
+	FINI	$0
