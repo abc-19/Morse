@@ -38,6 +38,12 @@
 	syscall
 .endm
 
+.macro	SAY_EN, pos
+	leaq	ALPHA_EN(%rip), %rax
+	addq	\pos, %rax
+	SAY_M	%rax, $1, $1
+.endm
+
 _start:	
 	popq	%rax
 	cmpq	$3, %rax
@@ -71,17 +77,27 @@ _start:
 	call	isItTextable
 	cmpl	$-1, %eax
 	je	.mT_nontex
+	cltq
+	movq	%rax, %rbx
+	leaq	MORSE(%rip), %rax
+	movq	(%rax, %rbx, 8), %rdi
+	movq	%rdi, %rbx
+	call	lenOf
+	SAY_M	%rbx, %rax, $1
+	SAY_EN	$26
+
+	jmp	.mT_next
 .mT_nontex:
 	SAY_M	%r15, $1, $1
-.mT_skip:
+.mT_next:
 	incq	%r15
 	jmp	.modeText
 .modeMorse:
 	jmp	.leaveAll
 
 .leaveAll:
+	SAY_EN	$27
 	FINI	$0
-
 
 # -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-*
 isItTextable:
@@ -107,3 +123,17 @@ isItTextable:
 .1_isspace:
 	movl	$26, %eax
 	ret
+
+lenOf:
+	xorq	%rcx, %rcx
+.2_keep:
+	movzbl	(%rdi), %eax
+	testl	%eax, %eax
+	jz	.2_fini
+	incq	%rcx
+	incq	%rdi
+	jmp	.2_keep
+.2_fini:
+	movq	%rcx, %rax
+	ret
+

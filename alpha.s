@@ -6,7 +6,6 @@
 #     / /  \ \  | |\ \  \7
 #      "     "    "  "		VK
 .section	.rodata
-
 	.Xa: .string ".-"
 	.Xb: .string "-..."
     	.Xc: .string "-.-."
@@ -33,12 +32,12 @@
     	.Xx: .string "-..-"
     	.Xy: .string "-.--"
     	.Xz: .string "--.."
-	.X_: .string "/ "
+	.X_: .string "/"
 
 	.section    .data.rel.local, "aw"
     	.align      32
-    	.size       .MORSE, 208
-    	.MORSE:
+    	.size       MORSE, 216
+    	MORSE:
 	.quad   .Xa
     	.quad   .Xb
     	.quad   .Xc
@@ -65,5 +64,9 @@
     	.quad   .Xx
     	.quad   .Xy
     	.quad   .Xz
+	.quad	.X_
 
 	.globl	MORSE
+
+	ALPHA_EN: .string "abcdefghijklmnopqrstuvwxyz \n"
+	.globl	ALPHA_EN
