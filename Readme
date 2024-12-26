@@ -1,0 +1,18 @@
+	         _.---._    /\\
+	      ./'       "--`\//		Morse - Readme
+	    ./              o \		abc19
+	   /./\  )______   \__ \	Dec 26 2024
+	  ./  / /\ \   | \ \  \ \
+	     / /  \ \  | |\ \  \7
+	      "     "    "  "		VK
+
+	Simple yet powerful morse encoder and decoder for the seek
+	of learning and fun...
+
+	./MrS	[mode]	"[message]"
+
+	Where mode is either 't' to go from text to morse and 'm'
+	to go from morse to text.
+
+	Juan Diego Patino Munoz.
+	Dec 26 2024

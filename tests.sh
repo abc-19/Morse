@@ -1,11 +1,11 @@
 #! /bin/sh
 #         _.---._    /\\
-#      ./'       "--`\//	Morse - test cases
-#    ./              o \	abc19
-#   /./\  )______   \__ \	Dec 26 2024
+#      ./'       "--`\//		Morse - test cases
+#    ./              o \		abc19
+#   /./\  )______   \__ \		Dec 26 2024
 #  ./  / /\ \   | \ \  \ \
 #     / /  \ \  | |\ \  \7
-#      "     "    "  "		VK
+#      "     "    "  "			VK
 
 test_m_mode () {
 	assertEquals "$(./MrS t "hola")" ".... --- .-.. .- "
