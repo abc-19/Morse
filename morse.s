@@ -16,9 +16,6 @@
 	.msg_nofnd: .string	"<?>"
 	.len_nofnd: .quad	3
 
-	.a: .string ".-"
-	.b: .string ".--"
-
 .section	.text
 .globl	_start
 
@@ -51,12 +48,6 @@
 .endm
 
 _start:
-	# leaq	.a(%rip), %rdi
-	# leaq	.b(%rip), %rsi
-	# call	strCmp
-	# cltq
-	# FINI	%rax
-
 	popq	%rax									# Get number of arguments............................
 	cmpq	$3, %rax								# Three arguments are needed.........................
 	jl	.showUsage
