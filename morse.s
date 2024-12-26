@@ -50,11 +50,11 @@ _start:
 	jl	.showUsage
 	popq	%rax
 	popq	%rax
-	popq	%r15										# XXX: Message's stored into r15
+	popq	%r15
 	pushq	%rbp
 	movq	%rsp, %rbp
-	subq	$64, %rsp
-	movq	%rbx, -8(%rbp)									# NOTE: is it really necessary?
+	subq	$8, %rsp
+	movq	$0, -8(%rbp)
 	movzbl	(%rax), %eax
 	cmpl	$'m', %eax
 	je	.modeMorse
@@ -93,8 +93,31 @@ _start:
 	jmp	.modeText
 
 .modeMorse:
-	jmp	.leaveAll
-
+	leaq	-8(%rbp), %r14
+.mM_eating:
+	movzbl	(%r15), %edi
+	testl	%edi, %edi
+	jz	.leaveAll
+	cmpl	$'.', %edi
+	je	.mM_store
+	cmpl	$'-', %edi
+	je	.mM_store
+	cmpl	$'/', %edi
+	je	.mM_space
+	cmpl	$' ', %edi
+	je	.mM_delimiter
+	SAY_M	%r15, $1, $1
+	jmp	.mM_next
+.mM_store:
+	jmp	.mM_next
+.mM_space:
+	jmp	.mM_next
+.mM_delimiter:
+	jmp	.mM_next
+.mM_next:
+	decq	%r14
+	incq	%r15
+	jmp	.mM_eating
 .leaveAll:
 	SAY_EN	$27
 	FINI	$0
@@ -111,7 +134,6 @@ isItMorseable:
 	jle	.1_is_upp
 	cmpl	$'a', %edi
 	jge	.1_is_low
-
 .1_is_upp:
 	addl	$32, %edi
 .1_is_low:
@@ -146,4 +168,3 @@ lenOf:
 .2_fini:
 	movq	%rcx, %rax
 	ret
-
