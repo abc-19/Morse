@@ -13,6 +13,9 @@
 	.msg_unkmo: .string	"MrS [e]: Unknown mode given\n"
 	.len_unkmo: .quad	28
 
+	.a: .string ".-"
+	.b: .string ".--"
+
 .section	.text
 .globl	_start
 
@@ -44,17 +47,23 @@
 	SAY_M	%rax, $1, $1
 .endm
 
-_start:	
-	popq	%rax
-	cmpq	$3, %rax
+_start:
+	# leaq	.a(%rip), %rdi
+	# leaq	.b(%rip), %rsi
+	# call	strCmp
+	# cltq
+	# FINI	%rax
+
+	popq	%rax									# Get number of arguments............................
+	cmpq	$3, %rax								# Three arguments are needed.........................
 	jl	.showUsage
-	popq	%rax
-	popq	%rax
-	popq	%r15
+	popq	%rax									# Gets executable's name.............................
+	popq	%rax									# Gets mode to be used...............................
+	popq	%r15									# Gets message (stored in r15 for ever)..............
 	pushq	%rbp
 	movq	%rsp, %rbp
 	subq	$8, %rsp
-	movq	$0, -8(%rbp)
+	movq	$0, -8(%rbp)								# Only for 'm' mode (stores the code)................
 	movzbl	(%rax), %eax
 	cmpl	$'m', %eax
 	je	.modeMorse
@@ -79,8 +88,8 @@ _start:
 	je	.mT_nontex
 	cltq
 	movq	%rax, %rbx
-	leaq	MORSE(%rip), %rax
-	movq	(%rax, %rbx, 8), %rdi
+	leaq	MORSE(%rip), %rax							# Gets array of codes................................
+	movq	(%rax, %rbx, 8), %rdi							# Gets the needed code...............................
 	movq	%rdi, %rbx
 	call	lenOf
 	SAY_M	%rbx, %rax, $1
@@ -93,7 +102,7 @@ _start:
 	jmp	.modeText
 
 .modeMorse:
-	leaq	-8(%rbp), %r14
+	leaq	-8(%rbp), %r14								# r14 will store the current code....................
 .mM_eating:
 	movzbl	(%r15), %edi
 	testl	%edi, %edi
@@ -106,21 +115,34 @@ _start:
 	je	.mM_space
 	cmpl	$' ', %edi
 	je	.mM_delimiter
-	SAY_M	%r15, $1, $1
+	SAY_M	%r15, $1, $1								# Print non-morse character..........................
 	jmp	.mM_next
 .mM_store:
-	leaq	-3(%rbp), %rax
-	cmpq	%rax, %r14
+	leaq	-3(%rbp), %rax								# Address memory where last byte can be stored.......
+	cmpq	%rax, %r14								# Making sure ain't code longer than 5 bytes.........
 	je	.mM_delimiter
-	movb	%dil, (%r14)
-	incq	%r14
+	movb	%dil, (%r14)								# Stores character as part of the code...............
+	incq	%r14									# Getting ready for next character...................
 	jmp	.mM_next
 .mM_space:
 	jmp	.mM_next
 .mM_delimiter:
-	SAY_L	-8(%rbp), $5, $1
-	FINI	$69
-	jmp	.mM_next
+	leaq	MORSE(%rip), %r13							# Reads array of morse codes..........................
+	movq	$0, %rcx								# Works as a counter aka `i`..........................
+.mM_delimiter_quest:
+	movq	(%r13, %rcx, 8), %rdi							# Reads the i-th code.................................
+	leaq	-8(%rbp), %rsi								# Code to compare with................................
+	call	strCmp
+	cmpl	$1, %eax
+	je	.mM_found
+	incq	%rcx									# i++.................................................
+	jmp	.mM_delimiter_quest
+.mM_found:
+	leaq	ALPHA_EN(%rip), %rax
+	addq	%rcx, %rcx
+	SAY_M	%rax, $1, $1
+	FINI	$0
+
 .mM_next:
 	incq	%r15
 	jmp	.mM_eating
@@ -161,7 +183,7 @@ isItMorseable:
 .1_no:
 	movl	$-1, %eax
 	ret
-
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-*
 lenOf:
 	xorq	%rcx, %rcx
 .2_keep:
@@ -173,4 +195,21 @@ lenOf:
 	jmp	.2_keep
 .2_fini:
 	movq	%rcx, %rax
+	ret
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-*
+strCmp:
+.3_loop:
+	movzbl	(%rdi), %eax
+	cmpb	(%rsi), %al
+	jne	.3_no
+	cmpb	$0, %al
+	je	.3_si
+	incq	%rdi
+	incq	%rsi
+	jmp	.3_loop
+.3_no:
+	movl	$0, %eax
+	ret
+.3_si:
+	movl	$1, %eax
 	ret
