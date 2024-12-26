@@ -109,13 +109,19 @@ _start:
 	SAY_M	%r15, $1, $1
 	jmp	.mM_next
 .mM_store:
+	leaq	-3(%rbp), %rax
+	cmpq	%rax, %r14
+	je	.mM_delimiter
+	movb	%dil, (%r14)
+	incq	%r14
 	jmp	.mM_next
 .mM_space:
 	jmp	.mM_next
 .mM_delimiter:
+	SAY_L	-8(%rbp), $5, $1
+	FINI	$69
 	jmp	.mM_next
 .mM_next:
-	decq	%r14
 	incq	%r15
 	jmp	.mM_eating
 .leaveAll:
