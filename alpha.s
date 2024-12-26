@@ -88,5 +88,5 @@
 
 	.globl	MORSE
 
-	ALPHA_EN: .string "abcdefghijklmnopqrstuvwxyz \n"
+	ALPHA_EN: .string "abcdefghijklmnopqrstuvwxyz0123456789 \n"
 	.globl	ALPHA_EN

@@ -13,6 +13,9 @@
 	.msg_unkmo: .string	"MrS [e]: Unknown mode given\n"
 	.len_unkmo: .quad	28
 
+	.msg_nofnd: .string	"<?>"
+	.len_nofnd: .quad	3
+
 	.a: .string ".-"
 	.b: .string ".--"
 
@@ -97,7 +100,7 @@ _start:
 .mT_nontex:
 	SAY_M	%r15, $1, $1
 .mT_next:
-	SAY_EN	$26
+	SAY_EN	$36
 	incq	%r15
 	jmp	.modeText
 
@@ -125,11 +128,14 @@ _start:
 	incq	%r14									# Getting ready for next character...................
 	jmp	.mM_next
 .mM_space:
+	SAY_EN	$36
 	jmp	.mM_next
 .mM_delimiter:
 	leaq	MORSE(%rip), %r13							# Reads array of morse codes..........................
 	movq	$0, %rcx								# Works as a counter aka `i`..........................
 .mM_delimiter_quest:
+	cmpq	$35, %rcx								# There are only 35 morse-codes.......................
+	je	.mM_nofound
 	movq	(%r13, %rcx, 8), %rdi							# Reads the i-th code.................................
 	leaq	-8(%rbp), %rsi								# Code to compare with................................
 	call	strCmp
@@ -137,20 +143,22 @@ _start:
 	je	.mM_found
 	incq	%rcx									# i++.................................................
 	jmp	.mM_delimiter_quest
+.mM_nofound:
+	SAY_L	.msg_nofnd(%rip), .len_nofnd(%rip), $1
+	jmp	.mM_clean
 .mM_found:
-	leaq	ALPHA_EN(%rip), %rax
-	addq	%rcx, %rcx
-	SAY_M	%rax, $1, $1
-	FINI	$0
-
+	SAY_EN	%rcx
+.mM_clean:
+	movq	$0, -8(%rbp)
+	leaq	-8(%rbp), %r14
 .mM_next:
 	incq	%r15
 	jmp	.mM_eating
 .leaveAll:
-	SAY_EN	$27
+	SAY_EN	$37
 	FINI	$0
 
-# -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-*
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-* -*-*-*-*-*-*-*-*-*-*-*-*-*-*
 isItMorseable:
 	cmpl	$' ', %edi
 	je	.1_isspace
